@@ -33,7 +33,8 @@ type TodoListDB struct {
 }
 
 type TodoListfile struct {
-	tasks []Task
+	filename string
+	tasks    []Task
 }
 
 type Task struct {
@@ -165,22 +166,6 @@ func (tasklist *TodoListfile) run() {
 
 	flag.Parse()
 
-	file, err := ioutil.ReadFile("tasks.txt")
-	if err != nil {
-		if errors.Is(err, os.ErrNotExist) {
-			fmt.Println("File not exists")
-			os.Exit(0)
-		}
-		fmt.Println(err)
-		os.Exit(0)
-	}
-	if len(file) != 0 {
-		err = json.Unmarshal(file, &tasklist.tasks)
-		if err != nil {
-			log.Fatal(err)
-		}
-	}
-
 	switch {
 	case *task != "":
 		tasklist.addTask(*task)
@@ -190,32 +175,25 @@ func (tasklist *TodoListfile) run() {
 		if err != nil {
 			log.Fatal(err)
 		}
-		ioutil.WriteFile("tasks.txt", json, 0644)
+		ioutil.WriteFile(tasklist.filename, json, 0644)
 	case *list:
 		tasklist.listTasks()
 
 	case *done != 0:
-		if err != nil {
-			fmt.Println("Invalid input please enter valid index")
-			os.Exit(0)
-		}
 		tasklist.markAsDone(*done)
 		json, err := json.Marshal(tasklist.tasks)
 		if err != nil {
 			log.Fatal(err)
 		}
-		ioutil.WriteFile("tasks.txt", json, 0644)
+		ioutil.WriteFile(tasklist.filename, json, 0644)
 	case *delete != 0:
-		if err != nil {
-			fmt.Println("Invalid input please enter valid index")
-			os.Exit(0)
-		}
+
 		tasklist.deleteTask(*delete)
 		json, err := json.Marshal(tasklist.tasks)
 		if err != nil {
 			log.Fatal(err)
 		}
-		ioutil.WriteFile("tasks.txt", json, 0644)
+		ioutil.WriteFile(tasklist.filename, json, 0644)
 	default:
 		fmt.Fprintln(os.Stderr, "Invalid option")
 	}
@@ -328,17 +306,35 @@ func runTodoApplication(t TodoList) {
 }
 
 func main() {
+	//<--- array datastore and user inputs as cmds --->///
 	// todoList := TodoListCMD{}
 	// todoList.run()
-	// todoList := TodoListfile{}
-	// todoList.run()
 
-	db, err := sql.Open("sqlite3", "todo.db")
+	//<--- array datastore and cmdline args --->///
+	todoList := TodoListfile{filename: "tasks.txt"}
+	file, err := ioutil.ReadFile(todoList.filename)
 	if err != nil {
-		log.Fatal(err)
+		if errors.Is(err, os.ErrNotExist) {
+			fmt.Println("File not exists")
+			os.Exit(0)
+		}
+		fmt.Println(err)
+		os.Exit(0)
 	}
-	defer db.Close()
-	todoList := TodoListDB{db: db}
-
+	if len(file) != 0 {
+		err = json.Unmarshal(file, &todoList.tasks)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
 	todoList.run()
+
+	//<--- DB as sqlite3 files --->///
+	// db, err := sql.Open("sqlite3", "todo.db")
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+	// defer db.Close()
+	// 	todoList := TodoListDB{db: db}
+	// todoList.run()
 }
