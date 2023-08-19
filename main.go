@@ -163,7 +163,21 @@ func (tasklist *TodoListfile) run() {
 	list := flag.Bool("list", false, "List all task")
 	done := flag.Int("done", 0, "Mark task as Done")
 	delete := flag.Int("delete", 0, "Delete task")
-
+	file, err := ioutil.ReadFile(tasklist.filename)
+	if err != nil {
+		if errors.Is(err, os.ErrNotExist) {
+			fmt.Println("File not exists")
+			os.Exit(0)
+		}
+		fmt.Println(err)
+		os.Exit(0)
+	}
+	if len(file) != 0 {
+		err = json.Unmarshal(file, &tasklist.tasks)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
 	flag.Parse()
 
 	switch {
@@ -312,21 +326,6 @@ func main() {
 
 	//<--- array datastore and cmdline args --->///
 	todoList := TodoListfile{filename: "tasks.txt"}
-	file, err := ioutil.ReadFile(todoList.filename)
-	if err != nil {
-		if errors.Is(err, os.ErrNotExist) {
-			fmt.Println("File not exists")
-			os.Exit(0)
-		}
-		fmt.Println(err)
-		os.Exit(0)
-	}
-	if len(file) != 0 {
-		err = json.Unmarshal(file, &todoList.tasks)
-		if err != nil {
-			log.Fatal(err)
-		}
-	}
 	todoList.run()
 
 	//<--- DB as sqlite3 files --->///
