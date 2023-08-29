@@ -1,13 +1,14 @@
 package todolist
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/todoapplication/db"
 	"github.com/todoapplication/services/task"
 )
 
-func listTasks() (tasks []task.Task, err error) {
+func listTasks(ctx context.Context) (tasks []task.Task, err error) {
 
 	rows, err := db.GetDB().Query("SELECT * from tasks")
 	if err != nil {

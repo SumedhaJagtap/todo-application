@@ -10,7 +10,6 @@ import (
 )
 
 func main() {
-
 	log.Println("Application has started")
 	os.Setenv("DBUSER", "root")
 	os.Setenv("DBPASS", "josh730")

@@ -1,6 +1,7 @@
 package task
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"strconv"
@@ -10,7 +11,7 @@ import (
 	utility "github.com/todoapplication/utility"
 )
 
-func addTask(task *Task) (taskId int64, err error) {
+func addTask(ctx context.Context, task *Task) (taskId int64, err error) {
 	if task.ID != 0 {
 		return 0, fmt.Errorf("TaskID should be empty")
 	}
@@ -29,7 +30,7 @@ func addTask(task *Task) (taskId int64, err error) {
 	return id, nil
 }
 
-func GetTaskById(taskId int64) (*Task, error) {
+func GetTaskById(ctx context.Context, taskId int64) (*Task, error) {
 	var task Task
 	if taskId == 0 {
 		return nil, fmt.Errorf("TaskID should be non-empty")
@@ -43,11 +44,11 @@ func GetTaskById(taskId int64) (*Task, error) {
 	}
 	return &task, nil
 }
-func deleteTask(taskId int64) error {
+func deleteTask(ctx context.Context, taskId int64) error {
 	if taskId == 0 {
 		return fmt.Errorf("TaskID should be non-empty")
 	}
-	_, err := GetTaskById(taskId)
+	_, err := GetTaskById(ctx, taskId)
 	if err != nil {
 		return fmt.Errorf("deleteTask: %v", err)
 	}
@@ -58,11 +59,11 @@ func deleteTask(taskId int64) error {
 	return nil
 }
 
-func markAsDone(taskId int64) error {
+func markAsDone(ctx context.Context, taskId int64) error {
 	if taskId == 0 {
 		return fmt.Errorf("TaskID should be non-empty")
 	}
-	_, err := GetTaskById(taskId)
+	_, err := GetTaskById(ctx, taskId)
 	if err != nil {
 		return fmt.Errorf("MarkAsDone: %v", err)
 	}

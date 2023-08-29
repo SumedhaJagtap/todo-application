@@ -14,6 +14,8 @@ import (
 )
 
 func AddTask(w http.ResponseWriter, req *http.Request) {
+	ctx := req.Context()
+
 	var task = &Task{}
 	err := json.NewDecoder(req.Body).Decode(&task)
 	switch {
@@ -30,15 +32,17 @@ func AddTask(w http.ResponseWriter, req *http.Request) {
 		String: strconv.FormatInt(utility.GetEpochTime(), 16),
 		Valid:  true,
 	}
-	taskId, err := addTask(task)
+	taskId, err := addTask(ctx, task)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	server_utility.Success(http.StatusCreated, server_utility.Response{Message: fmt.Sprintf("User #%d updated Successfully.", taskId)}, w)
+	server_utility.Success(http.StatusCreated, server_utility.Response{Message: fmt.Sprintf("Task #%d created Successfully.", taskId)}, w)
 }
 
 func DeleteTask(w http.ResponseWriter, req *http.Request) {
+	ctx := req.Context()
+
 	vars := mux.Vars(req)    // Extract URL variables
 	taskid := vars["taskid"] // Get the value of the "variable" variable
 	if taskid == "" {
@@ -49,7 +53,7 @@ func DeleteTask(w http.ResponseWriter, req *http.Request) {
 		server_utility.Error(http.StatusBadRequest, server_utility.Response{Message: err.Error()}, w)
 		return
 	}
-	err = deleteTask(id)
+	err = deleteTask(ctx, id)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -59,6 +63,8 @@ func DeleteTask(w http.ResponseWriter, req *http.Request) {
 }
 
 func DoneTask(w http.ResponseWriter, req *http.Request) {
+	ctx := req.Context()
+
 	vars := mux.Vars(req)    // Extract URL variables
 	taskid := vars["taskid"] // Get the value of the "variable" variable
 	if taskid == "" {
@@ -69,7 +75,7 @@ func DoneTask(w http.ResponseWriter, req *http.Request) {
 		server_utility.Error(http.StatusBadRequest, server_utility.Response{Message: err.Error()}, w)
 		return
 	}
-	err = markAsDone(id)
+	err = markAsDone(ctx, id)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
