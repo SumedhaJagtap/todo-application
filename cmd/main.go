@@ -1,18 +1,29 @@
 package main
 
 import (
-	_ "github.com/mattn/go-sqlite3"
-	"github.com/todoapplication/todo"
-	"github.com/todoapplication/todo_rest/server"
-)
+	"log"
+	"os"
 
-type TodoRunner todo.TodoList
+	_ "github.com/mattn/go-sqlite3"
+	"github.com/todoapplication/app"
+	"github.com/todoapplication/server"
+)
 
 func main() {
 
-	// tasklist := todorest.InitTodoList()
+	log.Println("Application has started")
+	os.Setenv("DBUSER", "root")
+	os.Setenv("DBPASS", "josh730")
 
-	// todo.Run(tasklist)
+	defer func() {
+		if r := recover(); r != nil {
+			log.Println("Error occured in application", r)
+		}
+		log.Println("Application stopped")
+	}()
+	app.Init()
+	defer app.Close()
+
 	server.StartServer()
 
 }
